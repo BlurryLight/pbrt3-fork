@@ -5,3 +5,5 @@ src/objs
 .sconsign.dblite
 compile_commands.json
 build/
+.cache
+*ctags*
