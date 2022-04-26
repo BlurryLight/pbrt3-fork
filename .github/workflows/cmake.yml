@@ -36,9 +36,9 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE --parallel
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: ctest
+#     temporally disable Test
+#     - name: Test
+#       working-directory: ${{github.workspace}}/build
+#       shell: bash
+#       run: ctest
 
