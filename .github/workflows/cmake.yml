@@ -1,0 +1,44 @@
+name: Build
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    # Setup caching of build artifacts to reduce total build time
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    # pbrt has no external dependencies
+    # - name: Install dependencies
+    #   run: sudo apt-get update && sudo apt-get install
+
+    - name: Configure CMake
+      # Use a bash shell so we can use the same syntax for environment variable
+      # access regardless of the host operating system
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE --parallel
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: ctest
+
