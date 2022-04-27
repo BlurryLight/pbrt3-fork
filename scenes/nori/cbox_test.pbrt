@@ -1,0 +1,47 @@
+
+LookAt 0 0.919769 5.41159  0 0.893051 4.41198    0 1 0
+Camera "perspective" "float fov" [27.7856]
+Film "image"  
+"integer xresolution" [800] "integer yresolution" [600]
+    "string filename" "test.exr"
+
+
+#Sampler "halton" "integer pixelsamples" [64]
+Sampler "halton" "integer pixelsamples" [512]
+
+Integrator "path" "float rrthreshold" 0.8
+
+WorldBegin
+
+AttributeBegin
+Material "matte" "color Kd" [0 0 0]
+AreaLightSource "area"  "color L" [40 40 40]
+ Include "meshes/light.pbrt"
+AttributeEnd
+
+AttributeBegin
+Material "matte" "color Kd" [0.725 0.71 0.68]
+ Include "meshes/walls.pbrt"
+AttributeEnd
+
+AttributeBegin
+Material "matte" "color Kd" [0.161 0.133 0.427]
+ Include "meshes/rightwall.pbrt"
+AttributeEnd
+
+AttributeBegin
+Material "matte" "color Kd" [0.630 0.065 0.05]
+ Include "meshes/leftwall.pbrt"
+AttributeEnd
+
+AttributeBegin
+Material "mirror" "color Kr" [1.0 1.0 1.0]
+ Include "meshes/sphere1.pbrt"
+AttributeEnd
+
+AttributeBegin
+Material "glass" 
+ Include "meshes/sphere2.pbrt"
+AttributeEnd
+
+WorldEnd

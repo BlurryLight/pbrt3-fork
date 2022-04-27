@@ -1,0 +1,28 @@
+# Converted from "rightwall.obj" by obj2pbrt
+# Scene bounds: (1.000000, 0.000000, -1.040000) - (1.000000, 1.590000, 0.990000)
+
+
+# Name "rightWall"
+AttributeBegin
+# Material unspecified in OBJ file
+Shape "trianglemesh"
+  "point3 P" [ 
+	1 1.590000033 0.9900000095
+	1 1.590000033 -1.039999962
+	1 0 -1.039999962
+	1 -0 0.9900000095
+]
+  "point2 st" [ 
+	0 1
+	0 1
+	0 1
+	0 1
+]
+  "integer indices" [ 
+	0 1 2
+	3 0 2
+	]
+
+AttributeEnd
+
+

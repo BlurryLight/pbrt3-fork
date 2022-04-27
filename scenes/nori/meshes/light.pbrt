@@ -1,0 +1,28 @@
+# Converted from "light.obj" by obj2pbrt
+# Scene bounds: (-0.240000, 1.580000, -0.220000) - (0.230000, 1.580000, 0.160000)
+
+
+# Name "light"
+AttributeBegin
+# Material unspecified in OBJ file
+Shape "trianglemesh"
+  "point3 P" [ 
+	0.2300000042 1.580000043 -0.2199999988
+	0.2300000042 1.580000043 0.1599999964
+	-0.2399999946 1.580000043 0.1599999964
+	-0.2399999946 1.580000043 -0.2199999988
+]
+  "point2 st" [ 
+	0 1
+	0 1
+	0 1
+	0 1
+]
+  "integer indices" [ 
+	0 1 2
+	3 0 2
+	]
+
+AttributeEnd
+
+
