@@ -3,12 +3,15 @@
 # in this file. Would be nice to address some of these.
 
 CMAKE_MINIMUM_REQUIRED ( VERSION 3.1.0 )
-
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE) # disable anoying cmake warning
 # For sanitizers
 SET (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 PROJECT ( PBRT-V3 )
-
+if(MSVC)
+  add_compile_options(/wd4244 /wd4244 /wd4267 /wd4018 /wd4334 /wd4305)
+  add_compile_options(/utf-8)
+endif()
 OPTION(PBRT_FLOAT_AS_DOUBLE "Use 64-bit floats" OFF)
 
 IF (PBRT_FLOAT_AS_DOUBLE)
@@ -341,6 +344,7 @@ ENDIF()
 ADD_SUBDIRECTORY(src/ext/glog)
 SET_PROPERTY(TARGET glog logging_unittest demangle_unittest utilities_unittest stl_logging_unittest PROPERTY FOLDER "ext")
 INCLUDE_DIRECTORIES (
+  SYSTEM
   src/ext/glog/src
   ${CMAKE_BINARY_DIR}/src/ext/glog
 )
