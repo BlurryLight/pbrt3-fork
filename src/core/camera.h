@@ -103,6 +103,27 @@ class ProjectiveCamera : public Camera {
             Scale(1 / (screenWindow.pMax.x - screenWindow.pMin.x),
                   1 / (screenWindow.pMin.y - screenWindow.pMax.y), 1) *
             Translate(Vector3f(-screenWindow.pMin.x, -screenWindow.pMax.y, 0));
+
+        // nori和pbrt的一个关键差别点是
+        // 对于ScreenToCamera矩阵，
+        // nori以width为1，height为 1 / aspect
+        // pbrt以height为1，width为 1 * aspect
+    
+       // pbrt的1 / (screenWindow.pMax.x - screenWindow.pMin.x) 约等于 (0.5 / aspect,0.5,1)
+       // 而nori的这部分是Eigen::DiagonalMatrix<float, 3>(Vector3f(-0.5f, -0.5f * aspect, 1.0f))
+       // Translation部分也要做部分变换
+        float aspect = (float)film->fullResolution.x / film->fullResolution.y;
+        auto noriScreenWindow =
+            Bounds2f(screenWindow.pMin / aspect, screenWindow.pMax / aspect);
+        auto noriScreenToRaster =
+            Scale(film->fullResolution.x, film->fullResolution.y, 1) *
+            Scale(1 / (noriScreenWindow.pMax.x - noriScreenWindow.pMin.x),
+                  1 / (noriScreenWindow.pMin.y - noriScreenWindow.pMax.y), 1)
+                   *
+            Translate(Vector3f(-noriScreenWindow.pMin.x, -noriScreenWindow.pMax.y, 0));
+
+        // RasterToScreen = Inverse(noriScreenToRaster);
+
         RasterToScreen = Inverse(ScreenToRaster);
         RasterToCamera = Inverse(CameraToScreen) * RasterToScreen;
     }
