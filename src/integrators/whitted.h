@@ -65,6 +65,22 @@ WhittedIntegrator *CreateWhittedIntegrator(
     const ParamSet &params, std::shared_ptr<Sampler> sampler,
     std::shared_ptr<const Camera> camera);
 
+class NormalIntegrator : public SamplerIntegrator{
+  public:
+    NormalIntegrator(std::shared_ptr<const Camera> camera,
+                      std::shared_ptr<Sampler> sampler,
+                      const Bounds2i &pixelBounds)
+        : SamplerIntegrator(camera, sampler, pixelBounds) {}
+    Spectrum Li(const RayDifferential &ray, const Scene &scene,
+                Sampler &sampler, MemoryArena &arena, int depth) const;
+
+};
+
+NormalIntegrator* CreateNormalIntegrator(
+    const ParamSet &params, std::shared_ptr<Sampler> sampler,
+    std::shared_ptr<const Camera> camera);
+
+
 }  // namespace pbrt
 
 #endif  // PBRT_INTEGRATORS_WHITTED_H

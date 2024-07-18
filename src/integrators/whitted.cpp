@@ -33,6 +33,9 @@
 
 // integrators/whitted.cpp*
 #include "integrators/whitted.h"
+
+#include <array>
+
 #include "interaction.h"
 #include "camera.h"
 #include "film.h"
@@ -105,6 +108,28 @@ WhittedIntegrator *CreateWhittedIntegrator(
         }
     }
     return new WhittedIntegrator(maxDepth, camera, sampler, pixelBounds);
+}
+
+Spectrum NormalIntegrator::Li(const RayDifferential& ray, const Scene& scene,
+    Sampler& sampler, MemoryArena& arena, int depth) const {
+    
+    SurfaceInteraction isect;
+    if (!scene.Intersect(ray, &isect)) {
+        return {0};
+    }
+
+    Normal3f n = isect.shading.n;
+    n += Normal3f(1, 1, 1);
+    n *= 0.5f; // [-1,1] -> [0,1]
+    const std::array<float, 3> Normal = {n.x, n.y, n.z}; 
+    return Spectrum::FromRGB(Normal.data());
+    
+}
+
+NormalIntegrator* CreateNormalIntegrator(const ParamSet& params,
+                                         std::shared_ptr<Sampler> sampler, std::shared_ptr<const Camera> camera) {
+    Bounds2i pixelBounds = camera->film->GetSampleBounds(); // ignore param pixel bounds
+    return new NormalIntegrator(camera, sampler, pixelBounds);
 }
 
 }  // namespace pbrt
