@@ -167,6 +167,7 @@ class BSDF {
     BSDF(const SurfaceInteraction &si, Float eta = 1)
         : eta(eta),
           ns(si.shading.n),
+            // 以Shading Normal和Shading Tangent构造局部的TBN矩阵。 
           ng(si.n),
           ss(Normalize(si.shading.dpdu)),
           ts(Cross(ns, ss)) {}
@@ -176,6 +177,11 @@ class BSDF {
     }
     int NumComponents(BxDFType flags = BSDF_ALL) const;
     Vector3f WorldToLocal(const Vector3f &v) const {
+        // 因为 [ss, ts, ns] 是正交矩阵
+        // LocalToWorld \cdot v = [ss ts ns] \cdot v
+        // 那么 World To Local 就是
+        // [ss ts ns] ^T \cdot v
+        // 展开为 dot(v, ss) , dot(v,ts) dot(ns v)
         return Vector3f(Dot(v, ss), Dot(v, ts), Dot(v, ns));
     }
     Vector3f LocalToWorld(const Vector3f &v) const {
