@@ -429,8 +429,12 @@ BVHBuildNode *BVHAccel::HLBVHBuild(
     // Find intervals of primitives for each treelet
     std::vector<LBVHTreelet> treeletsToBuild;
     for (int start = 0, end = 1; end <= (int)mortonPrims.size(); ++end) {
+        // > a set of points with Morton codes that match in their high bit values lie in a power-of-two aligned and sized subset of the original volume.
+        // 取高位12bit，只要高位12bit有一个值不一样，则划分为不同的cluster
+        // 总共会划分出4096个cluster
+        // 每个cluster都是三维的，每个轴各占4bit，每个轴16个cell(相当于我们把整个空间切成了4096份)
 #ifdef PBRT_HAVE_BINARY_CONSTANTS
-      uint32_t mask = 0b00111111111111000000000000000000;
+      uint32_t mask = 0b00'1111'1111'1111'00'0000'0000'0000'0000;
 #else
       uint32_t mask = 0x3ffc0000;
 #endif
@@ -492,6 +496,12 @@ BVHBuildNode *BVHAccel::emitLBVH(
         node->InitLeaf(firstPrimOffset, nPrimitives, bounds);
         return node;
     } else {
+        // Figure 4.8: Implications of the Morton Encoding.
+        // 认真读这个图
+        // morton码的最高位bit 相当于对半分开了整个空间
+        // 设置了1的在上面，0在下面
+        // 如果全在同一侧，那么这一层不用划分
+        
         int mask = 1 << bitIndex;
         // Advance to next subtree level if there's no LBVH split for this bit
         if ((mortonPrims[0].mortonCode & mask) ==
@@ -529,7 +539,11 @@ BVHBuildNode *BVHAccel::emitLBVH(
             emitLBVH(buildNodes, primitiveInfo, &mortonPrims[splitOffset],
                      nPrimitives - splitOffset, totalNodes, orderedPrims,
                      orderedPrimsOffset, bitIndex - 1)};
-        int axis = bitIndex % 3;
+        // 排列顺序   z1y1x1  z0y0z0
+        // bit index = 0, split axis = x = 0
+        // bit index = 1, split axis = y = 1
+        // bit index = 2, split axis = z = 2
+        int axis = bitIndex % 3; 
         node->InitInterior(axis, lbvh[0], lbvh[1]);
         return node;
     }
