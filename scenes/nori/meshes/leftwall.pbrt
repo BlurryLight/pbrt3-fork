@@ -1,28 +1,3 @@
-# Converted from "leftwall.obj" by obj2pbrt
-# Scene bounds: (-1.020000, -0.000000, -1.040000) - (-0.990000, 1.590000, 0.990000)
-
-
-# Name "leftWall"
-AttributeBegin
-# Material unspecified in OBJ file
-Shape "trianglemesh"
-  "point3 P" [ 
-	-1.019999981 1.590000033 -1.039999962
-	-1.019999981 1.590000033 0.9900000095
-	-1.00999999 -0 0.9900000095
-	-0.9900000095 0 -1.039999962
-]
-  "point2 st" [ 
-	0 1
-	0 1
-	0 1
-	0 1
-]
-  "integer indices" [ 
-	0 1 2
-	3 0 2
-	]
-
-AttributeEnd
-
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:bd13bd3b60a521e3b7eec2357ecdff0a0acdc86ba91bae5d27152ef6f4d80961
+size 469
