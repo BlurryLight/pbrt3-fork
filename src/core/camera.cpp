@@ -57,6 +57,9 @@ Camera::Camera(const AnimatedTransform &CameraToWorld, Float shutterOpen,
             "the system may crash as a result of this.");
 }
 
+// 这里我觉得书上的版本更好理解一点，不明白这里为什么改成了+0.5,-0.5
+// see https://github.com/BlurryLight/pbrt3-fork/commit/3968b4100933bf3a368a26006ec73b4687948a0c
+// see https://github.com/mmp/pbrt-v3/issues/162 for more details
 Float Camera::GenerateRayDifferential(const CameraSample &sample,
                                       RayDifferential *rd) const {
     Float wt = GenerateRay(sample, rd);
@@ -69,7 +72,7 @@ Float Camera::GenerateRayDifferential(const CameraSample &sample,
         sshift.pFilm.x += eps;
         Ray rx;
         wtx = GenerateRay(sshift, &rx);
-        rd->rxOrigin = rd->o + (rx.o - rd->o) / eps;
+        rd->rxOrigin = rd->o + (rx.o - rd->o) / eps;  //假设eps = 1,这里就是rx.o，因为步长变小了所以不得不外插一点光线方向，使得达到偏移一个像素的效果么
         rd->rxDirection = rd->d + (rx.d - rd->d) / eps;
         if (wtx != 0)
             break;

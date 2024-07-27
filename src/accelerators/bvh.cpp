@@ -197,7 +197,7 @@ BVHAccel::BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
     // Build BVH tree for primitives using _primitiveInfo_
     MemoryArena arena(1024 * 1024);
     int totalNodes = 0;
-    std::vector<std::shared_ptr<Primitive>> orderedPrims;
+    std::vector<std::shared_ptr<Primitive>> orderedPrims; // 最后一层的层序遍历的结果，按照建树顺序
     orderedPrims.reserve(primitives.size());
     BVHBuildNode *root;
     if (splitMethod == SplitMethod::HLBVH)
@@ -323,6 +323,7 @@ BVHBuildNode *BVHAccel::recursiveBuild(
                     // Initialize _BucketInfo_ for SAH partition buckets
                     for (int i = start; i < end; ++i) {
                         int b = nBuckets *
+                            // Offset方法: 计算一个点在Bounds的相对位置，p = pMax , offset = 1, p = pMin, offset = 0
                                 centroidBounds.Offset(
                                     primitiveInfo[i].centroid)[dim];
                         if (b == nBuckets) b = nBuckets - 1;
