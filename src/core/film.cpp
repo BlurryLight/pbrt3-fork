@@ -205,8 +205,11 @@ void Film::WriteImage(Float splatScale) {
     }
 
     // Write RGB image
-    LOG(INFO) << "Writing image " << filename << " with bounds " <<
+    std::stringstream ss;
+    ss << "Writing image " << filename << " with bounds " <<
         croppedPixelBounds;
+    std::cout << ss.str() << std::endl;
+    LOG(INFO) << ss.str();
     pbrt::WriteImage(filename, &rgb[0], croppedPixelBounds, fullResolution);
 }
 
@@ -225,8 +228,16 @@ Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {
 
     int xres = params.FindOneInt("xresolution", 1280);
     int yres = params.FindOneInt("yresolution", 720);
-    if (PbrtOptions.quickRender) xres = std::max(1, xres / 4);
-    if (PbrtOptions.quickRender) yres = std::max(1, yres / 4);
+    if (PbrtOptions.quickRender) xres = Clamp(xres / 4, 1, 256);
+    if (PbrtOptions.quickRender) yres = Clamp(yres / 4, 1, 256);
+    
+    if(PbrtOptions.quickRender) {
+        std::stringstream ss;
+        ss << "QuickRender: " << "xres: " << xres << " yres: " << yres;
+        LOG(WARNING) << ss.str();
+        printf("%s", ss.str().data());
+    }
+    
     Bounds2f crop;
     int cwi;
     const Float *cr = params.FindFloat("cropwindow", &cwi);

@@ -77,6 +77,8 @@ int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_stderrthreshold = 1; // Warning and above.
 
+    FLAGS_log_dir = "./logs/";
+
     Options options;
     std::vector<std::string> filenames;
     // Process command-line arguments
@@ -137,6 +139,11 @@ int main(int argc, char *argv[]) {
         } else
             filenames.push_back(argv[i]);
     }
+#ifndef NDEBUG
+    options.quickRender = true;
+    // FLAGS_logtostderr = true;
+    LOG(WARNING) << "Running in debug mode. Automatically enabling quick render mode.";
+#endif
 
     // Print welcome banner
     if (!options.quiet && !options.cat && !options.toPly) {
