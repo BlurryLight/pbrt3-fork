@@ -37,6 +37,8 @@
 #include "parser.h"
 #include "parallel.h"
 #include <glog/logging.h>
+#include "ext/filesystem/path.h"
+#include "ext/filesystem/resolver.h"
 
 using namespace pbrt;
 
@@ -78,6 +80,11 @@ int main(int argc, char *argv[]) {
     FLAGS_stderrthreshold = 1; // Warning and above.
 
     FLAGS_log_dir = "./logs/";
+    filesystem::path logDir(FLAGS_log_dir);
+    logDir = logDir.make_absolute();
+    if(!logDir.exists()) {
+        create_directory(logDir);
+    }
 
     Options options;
     std::vector<std::string> filenames;
