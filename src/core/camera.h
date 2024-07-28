@@ -98,6 +98,22 @@ class ProjectiveCamera : public Camera {
         // Compute projective camera transformations
 
         // Compute projective camera screen transformations
+        // read from bottom to upper
+        // first translate
+        // then scale to (1/..  ,经过前两步缩放到了(0,1)范围，也就到了NDC
+        // then scale the file->fullResolution
+
+        // ScreenSpace: 经过了投影变化，坐标系还是和ViewSpace是一样的
+        // 注意，ScreenSpace和NDCSpace的Y轴是相反的，所以第二步的scale是(1,-1,1)
+        // ScreenSpace -> NDCSpace
+        // (pMin.xy) --> (0,1)  (pMin.x, pMax.y) -> (0,0)
+        // (pMax.xy) --> (1,0)  (pMax.x, pMin.y) -> (1,1)
+
+        //  ![Untitled-1-2024-07-28-19-25-44](https://img.blurredcode.com/img/Untitled-1-2024-07-28-19-25-44.png?x-oss-process=style/compress)
+        // 首先把左上角对齐到(0,0)点，需要平移 (-pMin.x, -pMax.y)
+        // 然后Y轴需要反转，X,Y需要缩放到(0,1),
+        // 所以X轴的缩放为 (pMax.x - pMin.x)
+        // Y轴的缩放为(pMax.y - pMin.y) * (-1) //反转Y轴
         ScreenToRaster =
             Scale(film->fullResolution.x, film->fullResolution.y, 1) *
             Scale(1 / (screenWindow.pMax.x - screenWindow.pMin.x),
