@@ -132,4 +132,56 @@ NormalIntegrator* CreateNormalIntegrator(const ParamSet& params,
     return new NormalIntegrator(camera, sampler, pixelBounds);
 }
 
+Spectrum FurnaceTest::Li(const RayDifferential& r, const Scene& scene,
+                         Sampler& sampler, MemoryArena& arena,
+                         int depth) const {
+
+    ProfilePhase p(Prof::SamplerIntegratorLi);
+    Spectrum L(1.f); // 1.0 for white furnace
+    RayDifferential ray(r);
+
+    // Intersect _ray_ with scene and store intersection in _isect_
+    SurfaceInteraction isect;
+
+    static float RR_Threshold = 0.8;
+    if(sampler.Get1D() < RR_Threshold && depth != 0) {
+        return L;
+    }
+retry:
+    if (scene.Intersect(ray, &isect)) {
+        isect.ComputeScatteringFunctions(ray, arena, true);
+        if (!isect.bsdf) {
+            VLOG(2) << "Skipping intersection due to null bsdf";
+            ray = isect.SpawnRay(ray.d);
+            goto retry;
+        }
+
+        L = 0;
+        // // Compute coordinate frame based on true geometry, not shading
+        // // geometry.
+        Normal3f n = isect.n;
+        
+        Vector3f wi;
+        Float pdf;
+        BxDFType flags;
+        Vector3f wo = -ray.d;
+        Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
+                                          BSDF_ALL, &flags);
+        if(pdf < 1e-4) { return L;}
+        VLOG(2) << "Sampled BSDF, f = " << f << ", pdf = " << pdf;
+        
+        L += f * AbsDot(wi, n) / (pdf * RR_Threshold);
+    }
+    return L;
+
+}
+
+FurnaceTest* CreateFurnaceTest(const ParamSet& params,
+                               std::shared_ptr<Sampler> sampler,
+                               std::shared_ptr<const Camera> camera) {
+    Bounds2i pixelBounds = camera->film->GetSampleBounds();
+    // ignore param pixel bounds
+    return new FurnaceTest(camera, sampler, pixelBounds);
+}
+
 }  // namespace pbrt

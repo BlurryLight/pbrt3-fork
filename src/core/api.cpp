@@ -1676,8 +1676,10 @@ Integrator *RenderOptions::MakeIntegrator() const {
     Integrator *integrator = nullptr;
     if (IntegratorName == "whitted")
         integrator = CreateWhittedIntegrator(IntegratorParams, sampler, camera);
-    if (IntegratorName == "normal")
+    else if (IntegratorName == "normal")
         integrator = CreateNormalIntegrator(IntegratorParams, sampler, camera);
+    else if (IntegratorName == "furnace")
+        integrator = CreateFurnaceTest(IntegratorParams, sampler, camera);
     else if (IntegratorName == "directlighting")
         integrator =
             CreateDirectLightingIntegrator(IntegratorParams, sampler, camera);
