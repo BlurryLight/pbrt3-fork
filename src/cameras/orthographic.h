@@ -66,7 +66,7 @@ class OrthographicCamera : public ProjectiveCamera {
 
   private:
     // OrthographicCamera Private Data
-    Vector3f dxCamera, dyCamera;
+    Vector3f dxCamera, dyCamera;  // In Camera Space
 };
 
 OrthographicCamera *CreateOrthographicCamera(const ParamSet &params,

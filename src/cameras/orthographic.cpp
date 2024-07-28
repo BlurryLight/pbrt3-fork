@@ -47,6 +47,8 @@ Float OrthographicCamera::GenerateRay(const CameraSample &sample,
     // Compute raster and camera sample positions
     Point3f pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
     Point3f pCamera = RasterToCamera(pFilm);
+
+    // 正交相机的一个很好的特性，在ViewSpace下，Ray Direction 始终朝着(0,0,1)
     *ray = Ray(pCamera, Vector3f(0, 0, 1));
     // Modify ray for depth of field
     if (lensRadius > 0) {
@@ -107,6 +109,7 @@ Float OrthographicCamera::GenerateRayDifferential(const CameraSample &sample,
         ray->ryOrigin = Point3f(pLens.x, pLens.y, 0);
         ray->ryDirection = Normalize(pFocus - ray->ryOrigin);
     } else {
+        // 横向偏移一个像素和纵向偏移一个像素,方向不变
         ray->rxOrigin = ray->o + dxCamera;
         ray->ryOrigin = ray->o + dyCamera;
         ray->rxDirection = ray->ryDirection = ray->d;
