@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) {
                     assert(histoCosTheta >= 0 && histoCosTheta < numHistoBins);
 
                     // 这里相当于 \sum^{n}  {1} / pdf, 其中pdf是半圆上立体角的分布，相当于沿着半圆求半圆面积积分
-                    // 这个值应该接近于2Pi,不同的pdf有不同的分布，但是这个几何意义上求半圆面积积分应该始终等于2Pi
+                    // 这个值应该接近于2Pi,不同的pdf有不同的分布，但是这个几何意义上求半圆面积积分应该始终等于2Pi (单位 sr)
                     // （mirror这种狄拉克分布除外，算不了）
                     histogram[histoCosTheta][histoPhi] += 1.0 / pdf;
                 }
