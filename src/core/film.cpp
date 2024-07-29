@@ -33,6 +33,9 @@
 
 // core/film.cpp*
 #include "film.h"
+
+#include <ext/filesystem/resolver.h>
+
 #include "paramset.h"
 #include "imageio.h"
 #include "stats.h"
@@ -204,13 +207,19 @@ void Film::WriteImage(Float splatScale) {
         ++offset;
     }
 
+
+    filesystem::path filePath = filesystem::path(filename);
+    filePath = filePath .make_absolute();
+#ifndef NDEBUG
+    filePath = filePath.parent_path() / (filePath.stem() + "_debug" + "." + filePath.extension()); 
+#endif
     // Write RGB image
     std::stringstream ss;
-    ss << "Writing image " << filename << " with bounds " <<
+    ss << "Writing image " << filePath.str()<< " with bounds " <<
         croppedPixelBounds;
     std::cout << ss.str() << std::endl;
     LOG(INFO) << ss.str();
-    pbrt::WriteImage(filename, &rgb[0], croppedPixelBounds, fullResolution);
+    pbrt::WriteImage(filePath.str(), &rgb[0], croppedPixelBounds, fullResolution);
 }
 
 Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {

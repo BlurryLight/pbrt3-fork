@@ -148,6 +148,18 @@ public:
         return name.substr(pos+1);
     }
 
+    //++ravenzhong
+    std::string stem() const {
+        if (empty())
+            return "";
+        const std::string &last = m_path[m_path.size()-1];
+        size_t pos = last.find_last_of(".");
+        if (pos == std::string::npos)
+            return last;
+        return last.substr(0, pos);
+    }
+    //--ravenzhong
+
     std::string filename() const {
         if (empty())
             return "";
