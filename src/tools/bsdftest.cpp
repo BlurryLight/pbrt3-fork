@@ -131,15 +131,15 @@ int main(int argc, char* argv[]) {
     };
 
     GenSampleFunc SampleFuncArray[] = {
-        Gen_Sample_f,
-        // CO        Gen_CosHemisphere,
-        // CO        Gen_UniformHemisphere,
+        // Gen_Sample_f,
+        Gen_CosHemisphere,
+        // Gen_UniformHemisphere,
     };
 
     const char* SampleFuncDescripArray[] = {
-        "BSDF Importance Sampling",
-        // CO        "Cos Hemisphere",
-        // CO        "Uniform Hemisphere",
+        // "BSDF Importance Sampling",
+        "Cos Hemisphere",
+        // "Uniform Hemisphere",
     };
 
     int numModels = sizeof(BSDFFuncArray) / sizeof(BSDFFuncArray[0]);
@@ -162,7 +162,8 @@ int main(int argc, char* argv[]) {
     }
 
     // for each bsdf model
-    for (int model = 0; model < numModels; model++) {
+    // for (int model = 0; model < numModels; model++) { --ravenzhong
+    for (int model = 0; model < 1; model++) { //++ravenzhong
         BSDF* bsdf;
 
         // create BSDF which requires creating a Shape, casting a Ray
@@ -221,8 +222,8 @@ int main(int argc, char* argv[]) {
                 Vector3f wiL = bsdf->WorldToLocal(wi);
                 float x = Clamp(wiL.x, -1.f, 1.f);
                 float y = Clamp(wiL.y, -1.f, 1.f);
-                float wiPhi = (atan2(y, x) + Pi) / (2.0 * Pi);
-                float wiCosTheta = wiL.z;
+                float wiPhi = (atan2(y, x) + Pi) / (2.0 * Pi); // atan2 -> [-pi,pi] ，这里放缩到[0,1]
+                float wiCosTheta = wiL.z; // 这里也是[0,1]，正半球的Z值
                 bool validSample = (wiCosTheta > 1e-7);
                 if (wiPhi < -0.0001 || wiPhi > 1.0001 || wiCosTheta > 1.0001) {
                     // wiCosTheta can be less than 0
@@ -237,6 +238,10 @@ int main(int argc, char* argv[]) {
                       --histoCosTheta;
                     assert(histoPhi >= 0 && histoPhi < numHistoBins);
                     assert(histoCosTheta >= 0 && histoCosTheta < numHistoBins);
+
+                    // 这里相当于 \sum^{n}  {1} / pdf, 其中pdf是半圆上立体角的分布，相当于沿着半圆求半圆面积积分
+                    // 这个值应该接近于2Pi,不同的pdf有不同的分布，但是这个几何意义上求半圆面积积分应该始终等于2Pi
+                    // （mirror这种狄拉克分布除外，算不了）
                     histogram[histoCosTheta][histoPhi] += 1.0 / pdf;
                 }
 
@@ -255,6 +260,8 @@ int main(int argc, char* argv[]) {
                 } else {
                     // outgoing radiance estimate =
                     //   bsdf * incomingRadiance * cos(wi) / pdf
+
+                    // 白炉测试，出射的radiance应该接近于1.0，如果<1.0说明这个BSDF有能量损失
                     redSum += redF * environmentRadiance * AbsDot(wi, n) / pdf;
                 }
             }
