@@ -66,6 +66,11 @@ HaltonSampler::HaltonSampler(int samplesPerPixel, const Bounds2i &sampleBounds,
                              bool sampleAtPixelCenter)
     : GlobalSampler(samplesPerPixel), sampleAtPixelCenter(sampleAtPixelCenter) {
     // Generate random digit permutations for Halton sampler
+
+    // 计算扰动表的部分，打表(..
+    // 这里就不用看了，不是重点..
+    // 具体可以看 https://www.blurredcode.com/2024/01/0f112f8b/#%e6%89%93%e4%b9%b1%e5%ba%8f%e5%88%970%e4%b8%8d%e7%ad%89%e4%ba%8e0%e7%9a%84%e6%83%85%e5%86%b5
+    // faure permutation可以打表
     if (radicalInversePermutations.empty()) {
         RNG rng;
         radicalInversePermutations = ComputeRadicalInversePermutations(rng);
@@ -80,6 +85,13 @@ HaltonSampler::HaltonSampler(int samplesPerPixel, const Bounds2i &sampleBounds,
             scale *= base;
             ++exp;
         }
+
+        // 假设res = (x,y), 分别计算2^m >= x, 2^n >= y, m,n的值
+        // 比如res = {200,150}, kMaxResolution = 128
+        // 相当于 {128,128}
+        // 那么m=7, n=5, 2^7=128, 3^5=243
+        // baseScales = {128,243}
+        // baseExps = {7,5}
         baseScales[i] = scale;
         baseExponents[i] = exp;
     }

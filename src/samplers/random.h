@@ -47,10 +47,10 @@ namespace pbrt {
 class RandomSampler : public Sampler {
   public:
     RandomSampler(int ns, int seed = 0);
-    void StartPixel(const Point2i &);
-    Float Get1D();
-    Point2f Get2D();
-    std::unique_ptr<Sampler> Clone(int seed);
+    void StartPixel(const Point2i &)override;
+    Float Get1D() override;
+    Point2f Get2D() override;
+    std::unique_ptr<Sampler> Clone(int seed) override;
 
   private:
     RNG rng;

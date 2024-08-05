@@ -2491,7 +2491,10 @@ std::vector<uint16_t> ComputeRadicalInversePermutations(RNG &rng) {
     std::vector<uint16_t> perms;
     // Allocate space in _perms_ for radical inverse permutations
     int permArraySize = 0;
-    for (int i = 0; i < PrimeTableSize; ++i) permArraySize += Primes[i];
+    for (int i = 0; i < PrimeTableSize; ++i) {
+        // std::cout << "Primes[" << i << "] = " << Primes[i] << std::endl;
+        permArraySize += Primes[i];
+    }
     perms.resize(permArraySize);
     uint16_t *p = &perms[0];
     for (int i = 0; i < PrimeTableSize; ++i) {
