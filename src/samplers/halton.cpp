@@ -43,12 +43,29 @@ static PBRT_CONSTEXPR int kMaxResolution = 128;
 
 // HaltonSampler Utility Functions
 static void extendedGCD(uint64_t a, uint64_t b, int64_t *x, int64_t *y);
+
+// 这个函数的命名完全有问题..MultiplicativeInverse是倒数..这里和倒数没半毛钱关系
+// 实际上是 Modular multiplicative inverse
+
+// > 参考：[逆元与取模意义下的除法 - yhang323 - 博客园](https://www.cnblogs.com/wyh323/articles/inverse.html)
+//  对于\frac{a}{b} \mod n，如果b在模n下有逆元，那么\frac{a}{b} \mod n = a \cdot b^{-1} \mod n
+// 其中  b^{-1} \mod n 是一个标量，可以算出来
+// b^{-1} \mod n  =  multiplicativeInverse(b, n);
+
+// 举个例子，比如  a = 18, b = 3, n = 7, \frac{a}{b} mod n = 6
+// 这里代入进去， b^{-1} \mod n  =  multiplicativeInverse(3, 7) = 5;
+// \frac{18}{3} mod {7} = (18 * 5) mod 7 = 6
+// 逆元可以消去除法，转到乘法
 static uint64_t multiplicativeInverse(int64_t a, int64_t n) {
     int64_t x, y;
+
+    // ax + ny = gcd(a,n)
     extendedGCD(a, n, &x, &y);
+    assert(a * x + n * y == 1); //根据wiki，要使得模拟元存在，gcd必须==1, 也就是a和n必须互素
     return Mod(x, n);
 }
 
+// https://zh.wikipedia.org/wiki/%E6%89%A9%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E7%AE%97%E6%B3%95
 static void extendedGCD(uint64_t a, uint64_t b, int64_t *x, int64_t *y) {
     if (b == 0) {
         *x = 1;
