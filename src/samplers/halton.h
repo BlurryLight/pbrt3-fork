@@ -60,6 +60,9 @@ class HaltonSampler : public GlobalSampler {
     Point2i baseScales, baseExponents;
     int sampleStride;
     int multInverse[2];
+
+    // 记录上一次调用 GetIndexForSample()时的P,相当于缓存下来，避免每次GetIndexForSample都要去计算一堆逆元什么的
+    // 在halton sample里， 一旦P确定了，他的offsetForCurrentPixel就确定了
     mutable Point2i pixelForOffset = Point2i(std::numeric_limits<int>::max(),
                                              std::numeric_limits<int>::max());
     mutable int64_t offsetForCurrentPixel;

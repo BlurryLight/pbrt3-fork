@@ -147,9 +147,13 @@ int64_t HaltonSampler::GetIndexForSample(int64_t sampleNum) const {
 Float HaltonSampler::SampleDimension(int64_t index, int dim) const {
     if (sampleAtPixelCenter && (dim == 0 || dim == 1)) return 0.5f;
     if (dim == 0)
+        // 2为底
+        // 其实这里也可以写作
+        //return RadicalInverse(dim, index / baseScales[0]);
+        // 对于2为底的情况，除以2^m，和做位运算m位是等价的
         return RadicalInverse(dim, index >> baseExponents[0]);
     else if (dim == 1)
-        return RadicalInverse(dim, index / baseScales[1]);
+        return RadicalInverse(dim, index / baseScales[1]); // 3为底
     else
         return ScrambledRadicalInverse(dim, index,
                                        PermutationForDimension(dim));
