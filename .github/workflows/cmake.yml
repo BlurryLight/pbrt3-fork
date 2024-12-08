@@ -37,8 +37,8 @@ jobs:
       shell: bash
       run: cmake --build . --config $BUILD_TYPE --parallel
 #     temporally disable Test
-#     - name: Test
-#       working-directory: ${{github.workspace}}/build
-#       shell: bash
-#       run: ctest
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: pbrt_test
 
