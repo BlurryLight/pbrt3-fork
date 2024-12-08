@@ -207,12 +207,14 @@ void Film::WriteImage(Float splatScale) {
         ++offset;
     }
 
-
+//++ravenzhong
     filesystem::path filePath = filesystem::path(filename);
-    filePath = filePath .make_absolute();
+    // filePath = filePath.make_absolute();
 #ifndef NDEBUG
     filePath = filePath.parent_path() / (filePath.stem() + "_debug" + "." + filePath.extension()); 
 #endif
+//--ravenzhong
+
     // Write RGB image
     std::stringstream ss;
     ss << "Writing image " << filePath.str()<< " with bounds " <<

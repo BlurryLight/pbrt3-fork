@@ -79,12 +79,15 @@ int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_stderrthreshold = 1; // Warning and above.
 
+//++ravenzhong
     FLAGS_log_dir = "./logs/";
     filesystem::path logDir(FLAGS_log_dir);
-    logDir = logDir.make_absolute();
     if(!logDir.exists()) {
+        logDir = logDir.make_absolute();
         create_directory(logDir);
     }
+    logDir = logDir.make_absolute();
+//--ravenzhong
 
     Options options;
     std::vector<std::string> filenames;

@@ -81,7 +81,9 @@ public:
 #if !defined(_WIN32)
         char temp[PATH_MAX];
         if (realpath(str().c_str(), temp) == NULL)
+        {
             throw std::runtime_error("Internal error in realpath(): " + std::string(strerror(errno)));
+        }
         return path(temp);
 #else
         std::wstring value = wstr(), out(MAX_PATH_WINDOWS, '\0');

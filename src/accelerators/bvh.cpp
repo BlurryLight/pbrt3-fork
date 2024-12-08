@@ -164,6 +164,11 @@ static void RadixSort(std::vector<MortonPrimitive> *v) {
         }
 
         // Compute starting index in output array for each bucket
+        // 这是一个 prefix 操作
+        // 主要是为了节约一个O(n)的 bucket 空间开销
+        // 否则可以把数据里直接放到每个 bucket
+        // 出结果的时候直接遍历每个 bucket 把数据取出来就是这一次排序的结果
+    
         int outIndex[nBuckets];
         outIndex[0] = 0;
         for (int i = 1; i < nBuckets; ++i)
@@ -435,7 +440,7 @@ BVHBuildNode *BVHAccel::HLBVHBuild(
         // 总共会划分出4096个cluster
         // 每个cluster都是三维的，每个轴各占4bit，每个轴16个cell(相当于我们把整个空间切成了4096份)
 #ifdef PBRT_HAVE_BINARY_CONSTANTS
-      uint32_t mask = 0b00'1111'1111'1111'00'0000'0000'0000'0000;
+      uint32_t mask = 0b00111111111111000000000000000000;
 #else
       uint32_t mask = 0x3ffc0000;
 #endif
