@@ -40,5 +40,4 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: pbrt_test
-
+      run: ./pbrt_test

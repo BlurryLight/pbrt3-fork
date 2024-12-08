@@ -132,6 +132,7 @@ NormalIntegrator* CreateNormalIntegrator(const ParamSet& params,
     return new NormalIntegrator(camera, sampler, pixelBounds);
 }
 
+//++ravezhong
 Spectrum FurnaceTest::Li(const RayDifferential& r, const Scene& scene,
                          Sampler& sampler, MemoryArena& arena,
                          int depth) const {
@@ -183,5 +184,6 @@ FurnaceTest* CreateFurnaceTest(const ParamSet& params,
     // ignore param pixel bounds
     return new FurnaceTest(camera, sampler, pixelBounds);
 }
+//--ravezhong
 
 }  // namespace pbrt
