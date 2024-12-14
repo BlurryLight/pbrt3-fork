@@ -39,6 +39,9 @@
 #include "parallel.h"
 #include <algorithm>
 
+#define PBRT_LINEAR_BVH_CACHELINE_ALIGN 0 //++ravenzhong: 试图将BVH Node按照64bit Cache line来对齐，实际测试下来无明显提升
+
+
 namespace pbrt {
 
 STAT_MEMORY_COUNTER("Memory/BVH tree", treeBytes);
@@ -102,6 +105,8 @@ struct LinearBVHNode {
     uint8_t axis;          // interior node: xyz
     uint8_t pad[1];        // ensure 32 byte total size
 };
+
+static_assert(sizeof(LinearBVHNode) == 32, "Padding"); // ++ravenzhong: ensure cacheline friendly
 
 // BVHAccel Utility Functions
 inline uint32_t LeftShift3(uint32_t x) {
@@ -223,10 +228,19 @@ BVHAccel::BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
     // Compute representation of depth-first traversal of BVH tree
     treeBytes += totalNodes * sizeof(LinearBVHNode) + sizeof(*this) +
                  primitives.size() * sizeof(primitives[0]);
+#if !PBRT_LINEAR_BVH_CACHELINE_ALIGN //++ravenzhong
     nodes = AllocAligned<LinearBVHNode>(totalNodes);
     int offset = 0;
     flattenBVHTree(root, &offset);
     CHECK_EQ(totalNodes, offset);
+//++ravenzhong
+#else
+    nodes = AllocAligned<LinearBVHNode>(totalNodes + 1);
+    int offset = 0;
+    flattenBVHTree(root, &offset);
+    CHECK_EQ(totalNodes + 1, offset);
+#endif
+//--ravenzhong
 }
 
 Bounds3f BVHAccel::WorldBound() const {
@@ -661,6 +675,15 @@ int BVHAccel::flattenBVHTree(BVHBuildNode *node, int *offset) {
     LinearBVHNode *linearNode = &nodes[*offset];
     linearNode->bounds = node->bounds;
     int myOffset = (*offset)++;
+    //++ravenzhong
+#if PBRT_LINEAR_BVH_CACHELINE_ALIGN    
+    // root后的第一个节点是dummy节点，以让后面所有后续子节点都按64 bit cacheline对齐
+    if(*offset == 1)
+    {
+        (*offset)++;
+    }
+#endif
+    //--ravenzhong
     if (node->nPrimitives > 0) {
         CHECK(!node->children[0] && !node->children[1]);
         CHECK_LT(node->nPrimitives, 65536);
@@ -704,11 +727,19 @@ bool BVHAccel::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
                 // Put far BVH node on _nodesToVisit_ stack, advance to near
                 // node
                 if (dirIsNeg[node->axis]) {
+#if PBRT_LINEAR_BVH_CACHELINE_ALIGN //++ravenzhong
+                    nodesToVisit[toVisitOffset++] = currentNodeIndex + ((currentNodeIndex == 0) ? 2 : 1); //++ravenzhong
+#else 
                     nodesToVisit[toVisitOffset++] = currentNodeIndex + 1;
+#endif 
                     currentNodeIndex = node->secondChildOffset;
                 } else {
                     nodesToVisit[toVisitOffset++] = node->secondChildOffset;
+#if PBRT_LINEAR_BVH_CACHELINE_ALIGN //++ravenzhong
+                    currentNodeIndex = currentNodeIndex + ((currentNodeIndex == 0) ? 2 : 1); //++ravenzhong
+#else 
                     currentNodeIndex = currentNodeIndex + 1;
+#endif 
                 }
             }
         } else {
@@ -742,11 +773,19 @@ bool BVHAccel::IntersectP(const Ray &ray) const {
             } else {
                 if (dirIsNeg[node->axis]) {
                     /// second child first
+#if PBRT_LINEAR_BVH_CACHELINE_ALIGN //++ravenzhong
+                    nodesToVisit[toVisitOffset++] = currentNodeIndex + ((currentNodeIndex == 0) ? 2 : 1); //++ravenzhong
+#else 
                     nodesToVisit[toVisitOffset++] = currentNodeIndex + 1;
+#endif 
                     currentNodeIndex = node->secondChildOffset;
                 } else {
                     nodesToVisit[toVisitOffset++] = node->secondChildOffset;
+#if PBRT_LINEAR_BVH_CACHELINE_ALIGN //++ravenzhong
+                    currentNodeIndex = currentNodeIndex + ((currentNodeIndex == 0) ? 2 : 1); //++ravenzhong
+#else 
                     currentNodeIndex = currentNodeIndex + 1;
+#endif 
                 }
             }
         } else {

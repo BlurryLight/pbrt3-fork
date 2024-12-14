@@ -83,7 +83,6 @@ int main(int argc, char *argv[]) {
     FLAGS_log_dir = "./logs/";
     filesystem::path logDir(FLAGS_log_dir);
     if(!logDir.exists()) {
-        logDir = logDir.make_absolute();
         create_directory(logDir);
     }
     logDir = logDir.make_absolute();
