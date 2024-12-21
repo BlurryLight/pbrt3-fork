@@ -177,7 +177,16 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
         // Factor out radiance scaling due to refraction in rrBeta.
         Spectrum rrBeta = beta * etaScale;
         if (rrBeta.MaxComponentValue() < rrThreshold && bounces > 3) {
-            Float q = std::max((Float).05, 1 - rrBeta.MaxComponentValue());
+            // ++ravenzhong
+            // set rr propability to relative to (throughput/constant), the more depth ray is ,the more likely to terminate
+            // [CS 7650: Realistic Image Synthesis -- hw12](https://www.sci.utah.edu/~thiago/cs7650/hw12/index.html)
+            // PBRT的代码可以认为是 rr kill的概率是 1 - (throughput/ const) , const = 1的形式
+            // constant增加会导致更容易被 kill
+            // --ravenzhong
+            // Float q = std::max((Float).05, 1 - rrBeta.MaxComponentValue());
+
+            Float q = std::max((Float).1, 0.01f / std::max(rrBeta.MaxComponentValue(), (Float)1e-4f)); // ++ravenzhong: rr的选取可以随意，这里我也随便设定了一个策略，保持throughput越小的时候越容易被rr kill的概率
+
             if (sampler.Get1D() < q) break;
             beta /= 1 - q;
             DCHECK(!std::isinf(beta.y()));
