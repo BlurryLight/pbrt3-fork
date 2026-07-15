@@ -5,11 +5,32 @@
 **Build system**: CMake + Ninja. Output directory is `build/cmake-{platform}-{buildtype}`.
 When invoked by an agent, append `-agent` suffix: `build/cmake-{platform}-{buildtype}-agent`.
 
-Platform mapping: `uname -s | tr '[:upper:]' '[:lower:]'` → `darwin` / `linux`.
+### Quick build (recommended)
+
+The build script applies submodule patches then configures, builds, and tests:
 
 ```bash
-# One-time: init submodules (skip if already done)
+bash .github/scripts/build.sh
+```
+
+### Setup (one-time)
+
+After `git submodule update --init --recursive` or `git checkout`, the vendored
+submodules need mingw-compatibility patches applied. Run once:
+
+```bash
+bash .github/scripts/setup.sh
+```
+
+Patches are idempotent and `#ifdef __MINGW32__`-guarded — safe on all platforms.
+Once applied, you can invoke cmake directly (see below).
+
+### Manual cmake
+
+```bash
+# One-time: init submodules + apply patches
 git submodule update --init --recursive
+bash .github/scripts/setup.sh
 
 # Choose platform and build type
 platform=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -22,6 +43,7 @@ cmake --build "$builddir" --parallel
 
 **Agent builds** use `-agent` suffix on the build dir:
 ```bash
+bash .github/scripts/setup.sh
 builddir="build/cmake-${platform}-${buildtype}-agent"
 cmake -B "$builddir" -G Ninja -DCMAKE_BUILD_TYPE="$buildtype" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake --build "$builddir" --parallel
@@ -63,5 +85,5 @@ A single binary; all tests are linked into one executable using Google Test (bun
 
 ## CI
 
-- **GitHub Actions** (`.github/workflows/cmake.yml`): builds with Ninja on ubuntu-22.04, runs `pbrt_test`
+- **GitHub Actions** (`.github/workflows/cmake.yml`): builds with Ninja on `ubuntu-22.04` and `windows-latest` (msys2 ucrt64), runs `pbrt_test` on both
 - **Legacy**: `.travis.yml` and `appveyor.yml` (no longer active)

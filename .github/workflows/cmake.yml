@@ -1,12 +1,15 @@
 name: Build
 
-on: [push,workflow_dispatch]
+on: [push, workflow_dispatch]
 
 env:
   BUILD_TYPE: Release
 
 jobs:
-  build:
+  # ------------------------------------------------------------------
+  # Linux (gcc + ninja)
+  # ------------------------------------------------------------------
+  build-linux:
     runs-on: ubuntu-22.04
 
     steps:
@@ -14,30 +17,38 @@ jobs:
       with:
         submodules: recursive
 
-    # Setup caching of build artifacts to reduce total build time
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build -GNinja
-
-    # pbrt has no external dependencies
-    # - name: Install dependencies
-    #   run: sudo apt-get update && sudo apt-get install
-
-    - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
+    - name: Build and Test
       shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      run: bash .github/scripts/build.sh
 
-    - name: Build
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: cmake --build . --config $BUILD_TYPE --parallel
-#     temporally disable Test
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: ./pbrt_test
+  # ------------------------------------------------------------------
+  # Windows (msys2 ucrt64 + gcc + ninja)
+  # ------------------------------------------------------------------
+  build-msys2:
+    runs-on: windows-latest
+
+    steps:
+    - name: Use LF line endings (avoid CRLF breaking git apply on patches)
+      run: git config --global core.autocrlf false
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ucrt64
+        update: true
+        install: >-
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+          mingw-w64-ucrt-x86_64-zlib
+          git
+
+    - name: Build and Test
+      shell: msys2 {0}
+      run: bash .github/scripts/build.sh

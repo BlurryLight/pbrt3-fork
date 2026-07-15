@@ -9,3 +9,4 @@ build/
 *ctags*
 logs
 *.exr
+*.png

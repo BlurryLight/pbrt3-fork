@@ -1,0 +1,19 @@
+diff --git a/src/windows/port.h b/src/windows/port.h
+index d78a185..bfeee00 100755
+--- a/src/windows/port.h
++++ b/src/windows/port.h
+@@ -136,12 +136,14 @@ typedef int pid_t;
+ #endif  // _MSC_VER
+ 
+ // ----------------------------------- THREADS
++#ifndef __MINGW32__
+ typedef DWORD pthread_t;
+ typedef DWORD pthread_key_t;
+ typedef LONG pthread_once_t;
+ enum { PTHREAD_ONCE_INIT = 0 };   // important that this be 0! for SpinLock
+ #define pthread_self  GetCurrentThreadId
+ #define pthread_equal(pthread_t_1, pthread_t_2)  ((pthread_t_1)==(pthread_t_2))
++#endif
+ 
+ inline struct tm* localtime_r(const time_t* timep, struct tm* result) {
+   localtime_s(result, timep);
